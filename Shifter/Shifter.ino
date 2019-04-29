@@ -65,8 +65,7 @@ void loop() {
     }
 
   }
-  if(digitalRead(48)==HIGH&&digitalRead(34)==HIGH)
-  state = false;
+
   //state = false;
   //isr1();
   //isr2();
