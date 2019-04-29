@@ -1,2 +1,2 @@
 # AccelracersElec
-All the code and files for us to use in one place
+All codes and files at one place for us to use.
