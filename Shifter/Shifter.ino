@@ -8,19 +8,28 @@
 #define inpin4 11
 #define inpin5 12
 #define inpin6 13
-
 #define cooldown_up 100
 #define cooldown_down 600
-
 #define H_1 33
 #define H_2 41
-
 #define out_main 45
 int gcounter=0;
 byte gear=3;
 boolean state = false;
+boolean state2 = false;
 uint32_t prev_time;
-
+void changestatetrue(){
+  state = true;
+}
+void changestatefalse(){
+state = false;
+}
+void changestatetrue2(){
+  state2 = true;
+}
+void changestatefalse2(){
+state2 = false;
+}
 void setup()  {
   pinMode(48,INPUT_PULLUP);
   pinMode(34,INPUT_PULLUP);
@@ -35,9 +44,9 @@ void setup()  {
   pinMode(pinB,OUTPUT);
   pinMode(pinC,OUTPUT);
   pinMode(pinD,OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(3),changestatefalse,RISING);
+  attachInterrupt(digitalPinToInterrupt(3),changestatefalse,HIGH);
  //attachInterrupt(digitalPinToInterrupt(2),changestatetrue,FALLING);
-  attachInterrupt(digitalPinToInterrupt(2),changestatefalse,RISING);
+  attachInterrupt(digitalPinToInterrupt(2),changestatefalse2,HIGH);
   
   
   Serial.begin(115200);
@@ -45,24 +54,26 @@ void setup()  {
 
 void loop() {
   Serial.println(gcounter);
-  while (digitalRead(48) == LOW && !state)
+  if (digitalRead(3) == LOW && !state)
   { if(gcounter!=6)
     {
         upshift();
         gcounter++;
-        state=false;
+        state=true;
         Serial.println("up");
+        delay(100);
     }
   }
 
-  while (digitalRead(34) == LOW && !state)
+  if (digitalRead(2) == LOW && !state2)
   {
     if(!gcounter==0)
     {
           downshift();
           gcounter--;
-          state=false;
+          state2=true;
           Serial.println("down");
+          delay(100);
     }
 
   }
@@ -76,12 +87,7 @@ void loop() {
   //isr6();
   //isrn();
 }
-void changestatetrue{
-  state = true;
-}
-void changestatefalse{
-  state = false;
-}
+
 
 void isrn(){
   if((digitalRead(inpin1)!=LOW)&& (digitalRead(inpin2)!=LOW)&& (digitalRead(inpin3)!=LOW)&& (digitalRead(inpin4)!=LOW)&&(digitalRead(inpin5)!=LOW)&& (digitalRead(inpin6)!=LOW));
