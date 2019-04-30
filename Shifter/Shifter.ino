@@ -35,8 +35,10 @@ void setup()  {
   pinMode(pinB,OUTPUT);
   pinMode(pinC,OUTPUT);
   pinMode(pinD,OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(3),downshift,FALLING);
-  attachInterrupt(digitalPinToInterrupt(2),upshift,FALLING);
+  attachInterrupt(digitalPinToInterrupt(3),changestatefalse,RISING);
+ //attachInterrupt(digitalPinToInterrupt(2),changestatetrue,FALLING);
+  attachInterrupt(digitalPinToInterrupt(2),changestatefalse,RISING);
+  
   
   Serial.begin(115200);
 }
@@ -44,27 +46,27 @@ void setup()  {
 void loop() {
   Serial.println(gcounter);
   while (digitalRead(48) == LOW && !state)
-  { if(gcounter!=6){
+  { if(gcounter!=6)
+    {
         upshift();
-        state = true;
         gcounter++;
+        state=false;
         Serial.println("up");
-  }
-
+    }
   }
 
   while (digitalRead(34) == LOW && !state)
   {
-    if(!gcounter==0){
+    if(!gcounter==0)
+    {
           downshift();
-          state = true;
           gcounter--;
+          state=false;
           Serial.println("down");
     }
 
   }
-  if(digitalRead(48)==HIGH&&digitalRead(34)==HIGH)
-  state = false;
+
   //state = false;
   //isr1();
   //isr2();
@@ -73,6 +75,12 @@ void loop() {
   //isr5();
   //isr6();
   //isrn();
+}
+void changestatetrue{
+  state = true;
+}
+void changestatefalse{
+  state = false;
 }
 
 void isrn(){
