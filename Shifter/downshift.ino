@@ -7,7 +7,7 @@ void downshift()  {
   {
           digitalWrite(out_main, HIGH);
           Serial.print("D");
-          delay(1000);
+          delay(10);
           digitalWrite(H_1, HIGH);
           //Serial.print("2D");
           delay(about_100);

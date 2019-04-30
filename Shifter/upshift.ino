@@ -4,7 +4,7 @@ void upshift(){
   {
 
           digitalWrite(out_main, HIGH);
-          delay(1000);
+          delay(10);
           digitalWrite(H_2, HIGH);
           Serial.print("U");
           delay(about_100);
