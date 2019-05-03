@@ -1,10 +1,12 @@
 #include <SD.h>
 #include <SPI.h>
+#include "Adafruit_MLX90614.h"
 
 volatile byte  count = 0;
 byte numCount = 8; //number of pulse intervals to measure
-float spee = 0;
+float spee = 1500;
 float rad = 0.23;
+String temp = "";
 
 volatile unsigned long startTime;
 volatile unsigned long endTime;
@@ -14,11 +16,14 @@ unsigned long copy_endTime;
 volatile boolean finishCount = false;
 float period;
 
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+
+
 unsigned int rpm = 0;
 #include "I2Cdev.h"
 
 #include "MPU6050_6Axis_MotionApps20.h"
-#include "MPU6050.h" // not necessary if using MotionApps include file
+//#include "MPU6050.h" // not necessary if using MotionApps include file
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
@@ -104,14 +109,17 @@ void setup()
       break;  // leave the loop!
     }
   }
-  attachInterrupt(digitalPinToInterrupt(3), isrCount, RISING);//interrupt on pin3
+  attachInterrupt(digitalPinToInterrupt(2), isrCount, RISING);//interrupt on pin3
    // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin();
         TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
+  
     #endif
+
+    mlx.begin();
 
     // initialize serial communication
     // (115200 chosen because it is required for Teapot Demo output, but it's
@@ -132,7 +140,7 @@ void setup()
     Serial.println(F("Testing device connections..."));
     Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
     delay(1000);
-   //wait for ready
+    // wait for ready
    /* Serial.println(F("\nSend any character to begin DMP programming and demo: "));
     while (Serial.available() && Serial.read()); // empty buffer
     while (!Serial.available());                 // wait for data
@@ -156,7 +164,7 @@ void setup()
 
         // enable Arduino interrupt detection
         Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-        attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING);
+        attachInterrupt(digitalPinToInterrupt(19), dmpDataReady, RISING);
         mpuIntStatus = mpu.getIntStatus();
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
@@ -186,6 +194,9 @@ void loop()
     // wait for MPU interrupt or extra packet(s) available
     while (!mpuInterrupt && fifoCount < packetSize) {
         // other program behavior stuff here
+        // .
+        // .
+        // .
         // if you are really paranoid you can frequently test in between other
         // stuff to see if mpuInterrupt is true, and if so, "break;" from the
         // while() loop to immediately process the MPU data
@@ -206,9 +217,8 @@ void loop()
         // reset so we can continue cleanly
         mpu.resetFIFO();
         Serial.println(F("FIFO overflow!"));
-
-    // otherwise, check for DMP data ready interrupt (this should happen frequently)
-    } else if (mpuIntStatus & 0x02) {
+    }
+    // otherwise, check for DMP data ready interrupt (this should happen frequently) else if (mpuIntStatus & 0x02) {
         // wait for correct available data length, should be a VERY short wait
         while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
 
@@ -231,14 +241,17 @@ void loop()
             Serial.println(aaWorld.z);*/
             accel = String((float)aaWorld.x/16377)+','+String((float)aaWorld.y/16377)+','+String((float)aaWorld.z/16377);
             myFile = SD.open(filename,FILE_WRITE);
+            String temp = String((float)mlx.readObjectTempC());
+            
             if (myFile) {
     unsigned long now = millis();
-    String dataString = String(spee)+','+String(accel)+','+String(now);
+    String dataString = temp+','+String(spee)+','+String(accel)+','+String(now);
     myFile.println(dataString);
     myFile.close();
     Serial.println(dataString);
+    delay(10);
   } 
-    }
+    
   if (finishCount == true)
   {
     finishCount = false;//reset flag
@@ -251,26 +264,18 @@ void loop()
 
     period = (copy_endTime - copy_startTime) / 1000.0; //micros to millis
     //debug prints
-    Serial.print(period); //total time for numCount
+   /* Serial.print(period); //total time for numCount
     Serial.print('\t');
-    Serial.println(period/numCount);//time between individual pulses
+    Serial.println(period/numCount);//time between individual pulses*/
    
-       rpm = numCount * 12.0 * (1000.0/period);//five counts per revolution
+       rpm = numCount * 3.33 * (1000.0/period);//12 counts per revolution
 
     //rpm = numCount * 60.0 * (1000.0 / period);//one counts per revolution
     //rpm = numCount * 30.0 * (1000.0 / period);//two counts per revolution
  
-    Serial.print("RPM = ");
-    Serial.println(rpm);
-    spee = rpm*rad*0.06;
-    myFile = SD.open("lo2.txt", FILE_WRITE);
-  Serial.println("test");
-  if (myFile) {
-    unsigned long now = millis();
-    String dataString = String(spee)+','+String(accel)+','+String(now);
-    myFile.println(dataString);
-    myFile.close();
-    Serial.println(dataString);
-  } 
+    /*Serial.print("RPM = ");
+    Serial.println(rpm);*/
+    spee = rpm*rad*0.06*2*PI;
+    
   }
     }
