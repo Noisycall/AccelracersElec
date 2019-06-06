@@ -105,7 +105,6 @@ void setup()
     while(1);
   }
   Serial.println("initialization done.");
-  
 
   for (uint8_t i = 0; i < 100; i++) {
     filename[6] = i/10 + '0';
