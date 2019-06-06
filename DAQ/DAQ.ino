@@ -81,7 +81,7 @@ void isrCount(){
   if (count == numCount)
   {
     endTime = micros();
-    finishCount = true;   
+    finishCount = true;
   }
   count++; //increment after test for numCount
 }
@@ -95,10 +95,18 @@ void setup()
 
   if (!SD.begin(53)) {
     Serial.println("initialization failed!");
-    while (1);
+    digitalWrite(LED_PIN,HIGH);
+    delay(1000);
+    digitalWrite(LED_PIN,LOW);
+    delay(1000);
+    digitalWrite(LED_PIN,HIGH);
+    delay(1000);
+    digitalWrite(LED_PIN,LOW);
+    while(1);
   }
   Serial.println("initialization done.");
   
+
   for (uint8_t i = 0; i < 100; i++) {
     filename[6] = i/10 + '0';
     filename[7] = i%10 + '0';
@@ -116,7 +124,7 @@ void setup()
         TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
-  
+
     #endif
 
     mlx.begin();
@@ -224,7 +232,7 @@ void loop()
 
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
-        
+
         // track FIFO count here in case there is > 1 packet available
         // (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize;
@@ -242,7 +250,7 @@ void loop()
             accel = String((float)aaWorld.x/16377)+','+String((float)aaWorld.y/16377)+','+String((float)aaWorld.z/16377);
             myFile = SD.open(filename,FILE_WRITE);
             String temp = String((float)mlx.readObjectTempC());
-            
+
             if (myFile) {
     unsigned long now = millis();
     String dataString = temp+','+String(spee)+','+String(accel)+','+String(now);
@@ -250,8 +258,8 @@ void loop()
     myFile.close();
     Serial.println(dataString);
     delay(10);
-  } 
-    
+  }
+
   if (finishCount == true)
   {
     finishCount = false;//reset flag
@@ -267,15 +275,15 @@ void loop()
    /* Serial.print(period); //total time for numCount
     Serial.print('\t');
     Serial.println(period/numCount);//time between individual pulses*/
-   
+
        rpm = numCount * 3.33 * (1000.0/period);//12 counts per revolution
 
     //rpm = numCount * 60.0 * (1000.0 / period);//one counts per revolution
     //rpm = numCount * 30.0 * (1000.0 / period);//two counts per revolution
- 
+
     /*Serial.print("RPM = ");
     Serial.println(rpm);*/
     spee = rpm*rad*0.06*2*PI;
-    
+
   }
     }
