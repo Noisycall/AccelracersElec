@@ -2,12 +2,12 @@
 #define pinB 4
 #define pinC 5
 #define pinD 6
-#define inpin1 8
-#define inpin2 9
-#define inpin3 10
-#define inpin4 11
-#define inpin5 12
-#define inpin6 13
+#define inpin1 9
+#define inpin2 12
+#define inpin3 8
+#define inpin4 10
+#define inpin5 13
+#define inpin6 11
 
 void isrn(){
   if((digitalRead(inpin1)!=LOW)&& (digitalRead(inpin2)!=LOW)&& (digitalRead(inpin3)!=LOW)&& (digitalRead(inpin4)!=LOW)&&(digitalRead(inpin5)!=LOW)&& (digitalRead(inpin6)!=LOW));
